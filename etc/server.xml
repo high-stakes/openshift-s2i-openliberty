@@ -7,5 +7,5 @@
 
     <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="8080" httpsPort="8443"/>
 
-    <webApplication location="/opt/app-root/src/target/app"/>
+    <webApplication location="/opt/app-root/src/target/app.war" context-root="/" />
 </server>

@@ -23,4 +23,4 @@ echo "---> Installing application source..."
 cp -Rf /tmp/src/. ./
 
 echo "---> Building application from source..."
-mvn compile war:exploded
+mvn clean compile war:war

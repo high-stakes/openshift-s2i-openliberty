@@ -7,8 +7,10 @@ ARG MAVEN_VERSION=3.5.2
 ARG MAVEN_SHA=707b1f6e390a65bde4af4cdaf2a24d45fc19a6ded00fff02e91626e3e42ceaff
 ARG MAVEN_BASE_URL=https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries
 
-ENV WLP_INSTALL_DIR /opt/ol/wlp
+ENV WLP_HOME /opt/ol/wlp
 ENV MAVEN_HOME /usr/share/maven
+ENV SOURCE_DIR /opt/app-root
+ENV APP_DIRS $SOURCE_DIR $MAVEN_HOME $WLP_HOME
 
 ### JDK setup ###
 RUN yum update -y && \
@@ -31,13 +33,13 @@ RUN wget $LIBERTY_URL -q -O /tmp/wlp.zip \
    && unzip -q /tmp/wlp.zip -d /opt/ol \
    && rm /tmp/wlp.zip \
    && rm /tmp/wlp.zip.sha1 \
-   && $WLP_INSTALL_DIR/bin/server create \
-   && mkdir $WLP_INSTALL_DIR/etc \
-   && mkdir -p $WLP_INSTALL_DIR/usr/shared/resources \
-   && rm -rf $WLP_INSTALL_DIR/output/.classCache /output/workarea
+   && $WLP_HOME/bin/server create \
+   && mkdir $WLP_HOME/etc \
+   && mkdir -p $WLP_HOME/usr/shared/resources \
+   && rm -rf $WLP_HOME/output/.classCache /output/workarea
 
-COPY ./etc/jvm.options $WLP_INSTALL_DIR/etc/
-COPY ./etc/server.xml $WLP_INSTALL_DIR/usr/servers/defaultServer
+COPY ./etc/jvm.options $WLP_HOME/etc/
+COPY ./etc/server.xml $WLP_HOME/usr/servers/defaultServer
 
 ### Openshift setup ###
 LABEL io.k8s.description="Openliberty JavaEE container builder" \
@@ -46,7 +48,12 @@ LABEL io.k8s.description="Openliberty JavaEE container builder" \
       io.openshift.tags="builder,openliberty,javaee" \
       io.openshift.s2i.scripts-url=image:///usr/local/s2i
 
-COPY ./s2i/bin/ /usr/local/s2i
+RUN mkdir -p $SOURCE_DIR \
+    && chown -R 1001:1001 $APP_DIRS \
+    && chgrp -R 0 $APP_DIRS \
+    && chmod -R g+rwx $APP_DIRS
 
+COPY ./s2i/bin/ /usr/local/s2i
+USER 1001
 EXPOSE 8080
 CMD ["usage"]
