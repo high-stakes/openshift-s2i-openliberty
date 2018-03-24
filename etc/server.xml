@@ -1,0 +1,11 @@
+<server description="Liberty test server">
+    <featureManager>
+        <feature>cdi-1.2</feature>
+        <feature>jsf-2.2</feature>
+        <feature>jaxrs-2.0</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="8080" httpsPort="8443"/>
+
+    <webApplication location="/opt/app-root/src/target/app"/>
+</server>
